@@ -12,8 +12,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _name = 'Loading...';
-  String _school = 'Loading...';
+  final _nameController = TextEditingController();
+  final _schoolController = TextEditingController();
+  bool _isEditing = false;
   String _email = 'Loading...';
 
   @override
@@ -25,10 +26,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _name = prefs.getString('teacher_name') ?? 'Juan Dela Cruz';
-      _school = prefs.getString('school_name') ?? 'Not specified';
+      _nameController.text = prefs.getString('teacher_name') ?? 'Juan Dela Cruz';
+      _schoolController.text = prefs.getString('school_name') ?? 'Not specified';
       _email = prefs.getString('user_email') ?? 'teacher@deped.gov.ph';
     });
+  }
+
+  void _saveProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('teacher_name', _nameController.text);
+    await prefs.setString('school_name', _schoolController.text);
+    
+    setState(() => _isEditing = false);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+    }
   }
 
   @override
@@ -38,6 +53,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Teacher Profile'),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? LucideIcons.check : LucideIcons.edit),
+            onPressed: () {
+              if (_isEditing) {
+                _saveProfile();
+              } else {
+                setState(() => _isEditing = true);
+              }
+            },
+          ),
+        ],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -51,15 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildStatCards(lessonCount),
                   const SizedBox(height: 24),
                   _buildInfoSection(),
-                  const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(LucideIcons.save),
-                    label: const Text('Save Changes'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -85,10 +103,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Icon(LucideIcons.user, size: 50, color: Theme.of(context).primaryColor),
           ),
           const SizedBox(height: 16),
-          Text(
-            _name,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
+          if (_isEditing)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: TextField(
+                controller: _nameController,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                decoration: const InputDecoration(
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 2)),
+                ),
+              ),
+            )
+          else
+            Text(
+              _nameController.text,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
           Text(
             _email,
             style: TextStyle(color: Colors.white.withOpacity(0.8)),
@@ -137,7 +169,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         const Text('Professional Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        _infoTile(LucideIcons.school, 'School Name', _school),
+        if (_isEditing)
+          TextField(
+            controller: _schoolController,
+            decoration: const InputDecoration(labelText: 'School Name', prefixIcon: Icon(LucideIcons.school)),
+          )
+        else
+          _infoTile(LucideIcons.school, 'School Name', _schoolController.text),
         _infoTile(LucideIcons.graduationCap, 'Position', 'Teacher I / II / III'),
         _infoTile(LucideIcons.mapPin, 'Division', 'DepEd Regional Office'),
       ],
