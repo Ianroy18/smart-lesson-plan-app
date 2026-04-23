@@ -8,20 +8,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final bool showWelcome = prefs.getBool('show_welcome') ?? true;
+  final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LessonProvider()),
       ],
-      child: SmartLessonApp(showWelcome: showWelcome),
+      child: SmartLessonApp(
+        showWelcome: showWelcome,
+        isLoggedIn: isLoggedIn,
+      ),
     ),
   );
 }
 
 class SmartLessonApp extends StatelessWidget {
   final bool showWelcome;
-  const SmartLessonApp({super.key, required this.showWelcome});
+  final bool isLoggedIn;
+  const SmartLessonApp({
+    super.key, 
+    required this.showWelcome,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +38,9 @@ class SmartLessonApp extends StatelessWidget {
       title: 'Smart Lesson Plan System',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: showWelcome ? const WelcomeScreen() : const DashboardScreen(),
+      home: showWelcome 
+        ? const WelcomeScreen() 
+        : (isLoggedIn ? const DashboardScreen() : const LoginScreen()),
     );
   }
 }
