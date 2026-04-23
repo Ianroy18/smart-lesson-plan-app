@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import '../models/lesson_plan.dart';
 import '../services/lesson_repository.dart';
 
 class LessonProvider with ChangeNotifier {
