@@ -111,31 +111,37 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
         steps: [
           Step(
             title: const Text('Header'),
+            label: const Icon(LucideIcons.layout),
             isActive: _currentStep >= 0,
             content: _buildHeaderSection(),
           ),
           Step(
-            title: const Text('Obj.'),
+            title: const Text('Objectives'),
+            label: const Icon(LucideIcons.target),
             isActive: _currentStep >= 1,
             content: _buildObjectivesSection(),
           ),
           Step(
             title: const Text('Content'),
+            label: const Icon(LucideIcons.bookOpen),
             isActive: _currentStep >= 2,
             content: _buildContentSection(),
           ),
           Step(
-            title: const Text('Proc.'),
+            title: const Text('Procedures'),
+            label: const Icon(LucideIcons.listChecks),
             isActive: _currentStep >= 3,
             content: ProcedureSection(lesson: _currentLesson),
           ),
           Step(
-            title: const Text('Assmt'),
+            title: const Text('Assessment'),
+            label: const Icon(LucideIcons.clipboardCheck),
             isActive: _currentStep >= 4,
             content: _buildAssessmentSection(),
           ),
           Step(
-            title: const Text('Refl.'),
+            title: const Text('Reflection'),
+            label: const Icon(LucideIcons.messageSquare),
             isActive: _currentStep >= 5,
             content: _buildReflectionSection(),
           ),

@@ -4,7 +4,7 @@ import '../models/lesson_plan.dart';
 import '../services/database_helper.dart';
 
 class LessonProvider with ChangeNotifier {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final DatabaseHelper _dbHelper = getInstance();
   List<LessonPlan> _lessons = [];
   bool _isLoading = false;
 
