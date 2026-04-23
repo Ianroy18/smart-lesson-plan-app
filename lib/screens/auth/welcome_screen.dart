@@ -69,7 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   
                   const Text(
-                    'Smart Lesson Plan',
+                    'Lesson Plan',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,

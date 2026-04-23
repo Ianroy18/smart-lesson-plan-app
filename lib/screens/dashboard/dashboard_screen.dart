@@ -19,6 +19,10 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final _searchController = TextEditingController();
+  bool _isSearching = false;
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -51,9 +55,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Smart Lesson Plan System'),
+        title: _isSearching 
+          ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Search plans...',
+                hintStyle: TextStyle(color: Colors.white70),
+                border: InputBorder.none,
+              ),
+              onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+            )
+          : const Text('Lesson Plan'),
         actions: [
-          IconButton(icon: const Icon(LucideIcons.search), onPressed: () {}),
+          IconButton(
+            icon: Icon(_isSearching ? LucideIcons.x : LucideIcons.search), 
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _searchQuery = '';
+                }
+              });
+            }
+          ),
           PopupMenuButton<String>(
             icon: const Icon(LucideIcons.user),
             onSelected: (value) async {
@@ -85,11 +112,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (provider.isLoading) return const Center(child: CircularProgressIndicator());
           if (provider.lessons.isEmpty) return _buildEmptyState();
 
+          final lessons = provider.lessons.where((l) {
+            return l.topic.toLowerCase().contains(_searchQuery) ||
+                   l.subject.toLowerCase().contains(_searchQuery) ||
+                   l.gradeLevel.toLowerCase().contains(_searchQuery);
+          }).toList();
+
+          if (lessons.isEmpty && _searchQuery.isNotEmpty) {
+            return const Center(child: Text('No results found.'));
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            itemCount: provider.lessons.length,
+            itemCount: lessons.length,
             itemBuilder: (context, index) {
-              final lesson = provider.lessons[index];
+              final lesson = lessons[index];
               return _LessonCard(
                 lesson: lesson,
                 onEmail: () => _sendEmail(lesson),

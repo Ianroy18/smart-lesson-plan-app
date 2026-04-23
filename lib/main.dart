@@ -63,7 +63,7 @@ class SmartLessonApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Smart Lesson Plan System',
+      title: 'Lesson Plan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routes: {
