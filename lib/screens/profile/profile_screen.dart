@@ -14,6 +14,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _schoolController = TextEditingController();
+  final _positionController = TextEditingController();
+  final _divisionController = TextEditingController();
+  
   bool _isEditing = false;
   String _email = 'Loading...';
 
@@ -28,6 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _nameController.text = prefs.getString('teacher_name') ?? 'Juan Dela Cruz';
       _schoolController.text = prefs.getString('school_name') ?? 'Not specified';
+      _positionController.text = prefs.getString('teacher_position') ?? 'Teacher I / II / III';
+      _divisionController.text = prefs.getString('teacher_division') ?? 'DepEd Regional Office';
       _email = prefs.getString('user_email') ?? 'teacher@deped.gov.ph';
     });
   }
@@ -36,6 +41,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('teacher_name', _nameController.text);
     await prefs.setString('school_name', _schoolController.text);
+    await prefs.setString('teacher_position', _positionController.text);
+    await prefs.setString('teacher_division', _divisionController.text);
     
     setState(() => _isEditing = false);
     
@@ -53,19 +60,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Teacher Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditing ? LucideIcons.check : LucideIcons.edit),
-            onPressed: () {
-              if (_isEditing) {
-                _saveProfile();
-              } else {
-                setState(() => _isEditing = true);
-              }
-            },
-          ),
-        ],
         elevation: 0,
+        actions: [
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(LucideIcons.check),
+              onPressed: _saveProfile,
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -75,9 +77,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  _buildStatCards(lessonCount),
-                  const SizedBox(height: 24),
+                  if (!_isEditing) ...[
+                    _buildStatCards(lessonCount),
+                    const SizedBox(height: 24),
+                  ],
                   _buildInfoSection(),
+                  const SizedBox(height: 32),
+                  if (!_isEditing)
+                    ElevatedButton.icon(
+                      onPressed: () => setState(() => _isEditing = true),
+                      icon: const Icon(LucideIcons.edit),
+                      label: const Text('Edit Profile Information'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    )
+                  else
+                    ElevatedButton.icon(
+                      onPressed: _saveProfile,
+                      icon: const Icon(LucideIcons.save),
+                      label: const Text('Save Profile Changes'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -111,6 +138,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 decoration: const InputDecoration(
+                  hintText: 'Enter Full Name',
+                  hintStyle: TextStyle(color: Colors.white70),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white, width: 2)),
                 ),
@@ -169,16 +198,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         const Text('Professional Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        if (_isEditing)
-          TextField(
-            controller: _schoolController,
-            decoration: const InputDecoration(labelText: 'School Name', prefixIcon: Icon(LucideIcons.school)),
-          )
-        else
+        if (_isEditing) ...[
+          _buildEditField('School Name', _schoolController, LucideIcons.school),
+          _buildEditField('Position', _positionController, LucideIcons.graduationCap),
+          _buildEditField('Division', _divisionController, LucideIcons.mapPin),
+        ] else ...[
           _infoTile(LucideIcons.school, 'School Name', _schoolController.text),
-        _infoTile(LucideIcons.graduationCap, 'Position', 'Teacher I / II / III'),
-        _infoTile(LucideIcons.mapPin, 'Division', 'DepEd Regional Office'),
+          _infoTile(LucideIcons.graduationCap, 'Position', _positionController.text),
+          _infoTile(LucideIcons.mapPin, 'Division', _divisionController.text),
+        ],
       ],
+    );
+  }
+
+  Widget _buildEditField(String label, TextEditingController controller, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          border: const OutlineInputBorder(),
+        ),
+      ),
     );
   }
 
