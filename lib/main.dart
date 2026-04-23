@@ -13,6 +13,14 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  final prefs = await SharedPreferences.getInstance();
+  
+  // FORCE RESET: One-time clear to show Login Page
+  if (prefs.getBool('force_reset_v2') == null) {
+    await prefs.clear();
+    await prefs.setBool('force_reset_v2', true);
+  }
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
