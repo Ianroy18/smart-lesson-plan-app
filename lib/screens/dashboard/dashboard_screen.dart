@@ -52,7 +52,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Smart Lesson Plan System'),
         actions: [
           IconButton(icon: const Icon(LucideIcons.search), onPressed: () {}),
-          IconButton(icon: const Icon(LucideIcons.user), onPressed: () {}),
+          PopupMenuButton<String>(
+            icon: const Icon(LucideIcons.user),
+            onSelected: (value) async {
+              if (value == 'logout') {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // This will reset everything
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, '/');
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'profile', child: Text('My Profile')),
+              const PopupMenuItem(
+                value: 'logout', 
+                child: Text('Sign Out', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
         ],
       ),
       body: Consumer<LessonProvider>(

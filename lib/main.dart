@@ -51,9 +51,17 @@ class SmartLessonApp extends StatelessWidget {
       title: 'Smart Lesson Plan System',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: showWelcome 
-        ? const WelcomeScreen() 
-        : (isLoggedIn ? const DashboardScreen() : const LoginScreen()),
+      routes: {
+        '/': (context) => _getHome(),
+        '/dashboard': (context) => const DashboardScreen(),
+        '/login': (context) => const LoginScreen(),
+      },
     );
+  }
+
+  Widget _getHome() {
+    if (showWelcome) return const WelcomeScreen();
+    if (isLoggedIn) return const DashboardScreen();
+    return const LoginScreen();
   }
 }
