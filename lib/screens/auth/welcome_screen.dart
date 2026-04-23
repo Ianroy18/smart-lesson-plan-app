@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -17,109 +21,123 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF003366),
-              const Color(0xFF003366).withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              // App Logo Placeholder (User will see the generated logo in UI)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 20)],
-                ),
-                child: const Icon(LucideIcons.bookOpen, size: 80, color: Color(0xFF003366)),
-              ).animate().scale(duration: 600.ms, curve: Curves.backOut),
-              const SizedBox(height: 24),
-              const Text(
-                'Smart Lesson Plan',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ).animate().fadeIn(delay: 300.ms),
-              const Text(
-                'Digital notebook for modern teachers',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
-              ).animate().fadeIn(delay: 500.ms),
-              const Spacer(),
-              _buildFeatureRow(LucideIcons.zap, 'Offline-First', 'Work anytime, anywhere without internet.'),
-              _buildFeatureRow(LucideIcons.fileText, 'DepEd Format', 'Compliant with DepEd Order No. 42 s. 2016.'),
-              _buildFeatureRow(LucideIcons.share2, 'Easy Export', 'Print or share your plans as professional PDFs.'),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: ElevatedButton(
-                  onPressed: () => _completeOnboarding(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC8102E), // DepEd Red
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('Get Started', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-              ).animate().slideY(begin: 1, end: 0, delay: 800.ms),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => _showHowToUse(context),
-                child: const Text('How to Use This App?', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'by kuya ian',
-                style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1.2),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureRow(IconData icon, String title, String subtitle) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-      child: Row(
+      body: Stack(
         children: [
-          Icon(icon, color: Colors.amber, size: 28),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(subtitle, style: const TextStyle(color: Colors.white60, fontSize: 14)),
-              ],
+          // Background Gradient
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF003366).withOpacity(0.8),
+                  const Color(0xFF003366),
+                ],
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  // Logo Placeholder
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      LucideIcons.bookOpenCheck,
+                      size: 60,
+                      color: Color(0xFF003366),
+                    ),
+                  ).animate().scale(duration: 600.ms, curve: Curves.backOut),
+                  
+                  const SizedBox(height: 40),
+                  
+                  const Text(
+                    'Smart Lesson Plan',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
+                  ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.3, end: 0),
+                  
+                  const SizedBox(height: 12),
+                  
+                  const Text(
+                    'Your digital companion for efficient lesson planning, tailored for Filipino teachers.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      height: 1.5,
+                    ),
+                  ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.3, end: 0),
+                  
+                  const Spacer(),
+                  
+                  ElevatedButton(
+                    onPressed: () => _completeOnboarding(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF003366),
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.5, end: 0),
+                  
+                  const SizedBox(height: 16),
+                  
+                  TextButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const HowToUseModal(),
+                      );
+                    },
+                    child: const Text(
+                      'How to use this app?',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                    ),
+                  ).animate().fadeIn(delay: 1000.ms),
+                  
+                  const SizedBox(height: 24),
+                  const Text(
+                    'by kuya ian',
+                    style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 2),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 700.ms).slideX(begin: 0.1, end: 0);
-  }
-
-  void _showHowToUse(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => const HowToUseModal(),
     );
   }
 }
@@ -130,48 +148,56 @@ class HowToUseModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: const EdgeInsets.all(24),
-      height: MediaQuery.of(context).size.height * 0.7,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('How to Use', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              IconButton(icon: const Icon(LucideIcons.x), onPressed: () => Navigator.pop(context)),
+              const Text(
+                'How to use Smart Lesson Plan',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(LucideIcons.x),
+              ),
             ],
           ),
-          const Divider(),
+          const Divider(height: 32),
           Expanded(
             child: ListView(
               children: [
-                _step(1, 'Create a Lesson', 'Tap the red "+" button on the dashboard to start a new plan.'),
-                _step(2, 'Fill in Details', 'Follow the 7 steps (Header to Reflection). The app auto-saves your progress.'),
-                _step(3, 'Two-Column Procedures', 'Input Teacher Activities and Learner Responses side-by-side (Horizontal on Web, Vertical on Mobile).'),
-                _step(4, 'Export to PDF', 'Tap the file icon to generate a professional DepEd-style PDF ready for printing.'),
-                _step(5, 'Offline Work', 'Don\'t worry about internet! All your plans are saved locally on your device.'),
+                _buildStep(1, 'Log in or Sign Up', 'Access your personal dashboard to keep your lesson plans synced.'),
+                _buildStep(2, 'Create a New Plan', 'Tap the "+" button and fill in the DepEd required fields.'),
+                _buildStep(3, 'Step-by-Step Builder', 'Use the interactive stepper to complete Objectives up to Reflection.'),
+                _buildStep(4, 'Save & Export', 'Save your work anytime and export it as a professional PDF.'),
+                _buildStep(5, 'Email Copy', 'Send a quick summary to your email for easy sharing.'),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-            child: const Text('Got it!'),
           ),
         ],
       ),
     );
   }
 
-  Widget _step(int num, String title, String desc) {
+  Widget _buildStep(int num, String title, String desc) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(backgroundColor: const Color(0xFF003366), radius: 14, child: Text('$num', style: const TextStyle(color: Colors.white, fontSize: 12))),
+          CircleAvatar(
+            backgroundColor: const Color(0xFF003366), 
+            radius: 14, 
+            child: Text('$num', style: const TextStyle(color: Colors.white, fontSize: 12)),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

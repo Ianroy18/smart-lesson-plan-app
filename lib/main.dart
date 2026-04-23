@@ -15,7 +15,6 @@ void main() async {
   
   final prefs = await SharedPreferences.getInstance();
   
-  // FORCE RESET: One-time clear to show Login Page
   if (prefs.getBool('force_reset_v2') == null) {
     await prefs.clear();
     await prefs.setBool('force_reset_v2', true);
