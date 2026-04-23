@@ -17,9 +17,9 @@ void main() async {
     final prefs = await SharedPreferences.getInstance();
     
     // One-time reset logic
-    if (prefs.getBool('force_reset_v3') == null) {
+    if (prefs.getBool('force_reset_v4') == null) {
       await prefs.clear();
-      await prefs.setBool('force_reset_v3', true);
+      await prefs.setBool('force_reset_v4', true);
     }
 
     try {
