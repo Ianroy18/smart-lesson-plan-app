@@ -43,6 +43,16 @@ class PdfService {
             pw.Text('Mastery count: ${lesson.learnersMastery}'),
           ];
         },
+        footer: (pw.Context context) {
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(top: 10),
+            child: pw.Text(
+              'by kuya ian',
+              style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+            ),
+          );
+        },
       ),
     );
 

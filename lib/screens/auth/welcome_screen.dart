@@ -84,7 +84,12 @@ class WelcomeScreen extends StatelessWidget {
                 onPressed: () => _showHowToUse(context),
                 child: const Text('How to Use This App?', style: TextStyle(color: Colors.white)),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 16),
+              const Text(
+                'by kuya ian',
+                style: TextStyle(color: Colors.white38, fontSize: 12, letterSpacing: 1.2),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

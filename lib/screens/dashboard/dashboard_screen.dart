@@ -62,6 +62,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         },
       ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: const Text(
+          'by kuya ian',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.grey, fontSize: 11, letterSpacing: 1),
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
