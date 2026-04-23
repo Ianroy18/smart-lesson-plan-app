@@ -38,7 +38,9 @@ class LessonPlan {
   DateTime createdAt;
   DateTime updatedAt;
 
-  // I. Header
+  // I. Header (Enhanced)
+  String region;
+  String department;
   String school;
   String teacherName;
   String subject;
@@ -46,29 +48,31 @@ class LessonPlan {
   DateTime? date;
   String quarter;
 
+  // Type: 'detailed' (script-style) or 'semi-detailed' (outline-style)
+  String lessonType;
+
   // II. Objectives
   String contentStandard;
   String performanceStandard;
-  String melc; // Most Essential Learning Competency
+  String melc;
 
-  // III. Content
+  // III. Paksang Aralin (Topic/Subject Matter)
   String topic;
+  String references;
+  String materials;
+  String values;
 
-  // IV. Learning Resources
-  String teachersGuide;
-  String learnersMaterials;
-  String otherMaterials;
-
-  // V. Procedures
+  // IV. Procedures
   List<ProcedureStep> procedures;
+  
+  // V. Images/Visual Aids (Base64 list)
+  List<String> images;
 
   // VI. Assessment
   String assessment;
 
-  // VII. Remarks
+  // VII. Remarks & Reflection
   String remarks;
-
-  // VII. Reflection
   String reflectionWhatWorked;
   String reflectionNeedsImprovement;
   int learnersMastery;
@@ -78,20 +82,24 @@ class LessonPlan {
     required this.userId,
     required this.createdAt,
     required this.updatedAt,
+    this.region = 'BANGSAMORO AUTONOMOUS REGION IN MUSLIM MINDANAO',
+    this.department = 'DEPARTMENT OF EDUCATION',
     this.school = '',
     this.teacherName = '',
     this.subject = '',
     this.gradeLevel = '',
     this.date,
     this.quarter = '1',
+    this.lessonType = 'detailed',
     this.contentStandard = '',
     this.performanceStandard = '',
     this.melc = '',
     this.topic = '',
-    this.teachersGuide = '',
-    this.learnersMaterials = '',
-    this.otherMaterials = '',
+    this.references = '',
+    this.materials = '',
+    this.values = '',
     List<ProcedureStep>? procedures,
+    this.images = const [],
     this.assessment = '',
     this.remarks = '',
     this.reflectionWhatWorked = '',
@@ -101,16 +109,15 @@ class LessonPlan {
 
   static List<ProcedureStep> _defaultProcedures() {
     return [
-      ProcedureStep(stepId: 'A', stepTitle: 'Reviewing previous lesson or presenting the new lesson'),
-      ProcedureStep(stepId: 'B', stepTitle: 'Establishing a purpose for the lesson'),
-      ProcedureStep(stepId: 'C', stepTitle: 'Presenting examples/instances of the new lesson'),
-      ProcedureStep(stepId: 'D', stepTitle: 'Discussing new concepts and practicing new skills #1'),
-      ProcedureStep(stepId: 'E', stepTitle: 'Discussing new concepts and practicing new skills #2'),
-      ProcedureStep(stepId: 'F', stepTitle: 'Developing mastery (Leads to Formative Assessment 3)'),
-      ProcedureStep(stepId: 'G', stepTitle: 'Finding practical applications of concepts and skills in daily living'),
-      ProcedureStep(stepId: 'H', stepTitle: 'Making generalizations and abstractions about the lesson'),
-      ProcedureStep(stepId: 'I', stepTitle: 'Evaluating learning'),
-      ProcedureStep(stepId: 'J', stepTitle: 'Additional activities for application or remediation'),
+      ProcedureStep(stepId: 'A', stepTitle: 'Reviewing previous lesson / Panimulang Gawain'),
+      ProcedureStep(stepId: 'B', stepTitle: 'Establishing a purpose / Paghahabi ng Layunin'),
+      ProcedureStep(stepId: 'C', stepTitle: 'Presenting examples / Paglalahad'),
+      ProcedureStep(stepId: 'D', stepTitle: 'Discussion / Pagtatalakay'),
+      ProcedureStep(stepId: 'E', stepTitle: 'Developing mastery / Paglilinang ng Kabihasaan'),
+      ProcedureStep(stepId: 'F', stepTitle: 'Practical applications / Paglalapat'),
+      ProcedureStep(stepId: 'G', stepTitle: 'Generalizations / Paglalahat'),
+      ProcedureStep(stepId: 'H', stepTitle: 'Evaluating learning / Pagtataya'),
+      ProcedureStep(stepId: 'I', stepTitle: 'Additional activities / Takdang Aralin'),
     ];
   }
 
@@ -120,20 +127,24 @@ class LessonPlan {
       'userId': userId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'region': region,
+      'department': department,
       'school': school,
       'teacherName': teacherName,
       'subject': subject,
       'gradeLevel': gradeLevel,
       'date': date?.toIso8601String(),
       'quarter': quarter,
+      'lessonType': lessonType,
       'contentStandard': contentStandard,
       'performanceStandard': performanceStandard,
       'melc': melc,
       'topic': topic,
-      'teachersGuide': teachersGuide,
-      'learnersMaterials': learnersMaterials,
-      'otherMaterials': otherMaterials,
+      'references': references,
+      'materials': materials,
+      'values': values,
       'procedures': jsonEncode(procedures.map((e) => e.toMap()).toList()),
+      'images': jsonEncode(images),
       'assessment': assessment,
       'remarks': remarks,
       'reflectionWhatWorked': reflectionWhatWorked,
@@ -151,25 +162,34 @@ class LessonPlan {
       proceduresList = _defaultProcedures();
     }
 
+    var imagesList = <String>[];
+    if (map['images'] != null) {
+      imagesList = List<String>.from(jsonDecode(map['images']));
+    }
+
     return LessonPlan(
       id: map['id']?.toString(),
       userId: map['userId'] ?? '',
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
+      region: map['region'] ?? '',
+      department: map['department'] ?? '',
       school: map['school'] ?? '',
       teacherName: map['teacherName'] ?? '',
       subject: map['subject'] ?? '',
       gradeLevel: map['gradeLevel'] ?? '',
       date: map['date'] != null ? DateTime.parse(map['date']) : null,
       quarter: map['quarter'] ?? '1',
+      lessonType: map['lessonType'] ?? 'detailed',
       contentStandard: map['contentStandard'] ?? '',
       performanceStandard: map['performanceStandard'] ?? '',
       melc: map['melc'] ?? '',
       topic: map['topic'] ?? '',
-      teachersGuide: map['teachersGuide'] ?? '',
-      learnersMaterials: map['learnersMaterials'] ?? '',
-      otherMaterials: map['otherMaterials'] ?? '',
+      references: map['references'] ?? '',
+      materials: map['materials'] ?? '',
+      values: map['values'] ?? '',
       procedures: proceduresList,
+      images: imagesList,
       assessment: map['assessment'] ?? '',
       remarks: map['remarks'] ?? '',
       reflectionWhatWorked: map['reflectionWhatWorked'] ?? '',

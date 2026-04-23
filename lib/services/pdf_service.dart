@@ -1,5 +1,5 @@
-import 'dart:io';
-import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -16,41 +16,46 @@ class PdfService {
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return [
-            _buildHeader(lesson),
+            _buildFullHeader(lesson),
             pw.SizedBox(height: 20),
-            _buildSectionTitle('I. OBJECTIVES'),
+            _buildSectionTitle('I. LAYUNIN'),
             _buildObjectiveRow('Content Standards', lesson.contentStandard),
             _buildObjectiveRow('Performance Standards', lesson.performanceStandard),
-            _buildObjectiveRow('Learning Competencies (MELC)', lesson.melc),
+            _buildObjectiveRow('MELC', lesson.melc),
             pw.SizedBox(height: 10),
-            _buildSectionTitle('II. CONTENT'),
-            pw.Text(lesson.topic, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+            _buildSectionTitle('II. PAKSANG ARALIN'),
+            _buildInfoRow('Paksa', lesson.topic),
+            _buildInfoRow('Sanggunian', lesson.references),
+            _buildInfoRow('Kagamitan', lesson.materials),
+            _buildInfoRow('Pagpapahalaga', lesson.values),
             pw.SizedBox(height: 10),
-            _buildSectionTitle('III. LEARNING RESOURCES'),
-            _buildResourceRow('Teacher\'s Guide', lesson.teachersGuide),
-            _buildResourceRow('Learner\'s Materials', lesson.learnersMaterials),
-            _buildResourceRow('Other Materials', lesson.otherMaterials),
-            pw.SizedBox(height: 10),
-            _buildSectionTitle('IV. PROCEDURES'),
+            _buildSectionTitle('III. PAMAMARAAN'),
             _buildProcedureTable(lesson),
             pw.SizedBox(height: 10),
-            _buildSectionTitle('V. REMARKS'),
-            pw.Text(lesson.remarks),
+            _buildSectionTitle('IV. PAGTATAYA'),
+            pw.Text(lesson.assessment),
             pw.SizedBox(height: 10),
-            _buildSectionTitle('VI. REFLECTION'),
-            pw.Text('What worked well: ${lesson.reflectionWhatWorked}'),
-            pw.Text('Needs improvement: ${lesson.reflectionNeedsImprovement}'),
-            pw.Text('Mastery count: ${lesson.learnersMastery}'),
+            _buildSectionTitle('V. TAKDANG ARALIN'),
+            pw.Text(lesson.remarks), // Using remarks as takdang aralin for now
+            if (lesson.images.isNotEmpty) ...[
+              pw.SizedBox(height: 20),
+              _buildSectionTitle('VISUAL AIDS / ATTACHMENTS'),
+              pw.Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: lesson.images.map((img) {
+                  final bytes = base64Decode(img.split(',').last);
+                  return pw.Image(pw.MemoryImage(bytes), width: 200);
+                }).toList(),
+              ),
+            ],
           ];
         },
         footer: (pw.Context context) {
           return pw.Container(
             alignment: pw.Alignment.centerRight,
             margin: const pw.EdgeInsets.only(top: 10),
-            child: pw.Text(
-              'by kuya ian',
-              style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
-            ),
+            child: pw.Text('Generated via Lesson Plan App | by kuya ian', style: pw.TextStyle(fontSize: 8)),
           );
         },
       ),
@@ -62,100 +67,106 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildHeader(LessonPlan lesson) {
+  static pw.Widget _buildFullHeader(LessonPlan lesson) {
     return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Center(child: pw.Text('DETAILED LESSON PLAN (DLP)', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold))),
-        pw.SizedBox(height: 10),
-        pw.Row(
-          children: [
-            pw.Expanded(child: _headerField('School', lesson.school)),
-            pw.Expanded(child: _headerField('Grade Level', lesson.gradeLevel)),
-          ],
+        pw.Center(child: pw.Text('REPUBLIC OF THE PHILIPPINES', style: pw.TextStyle(fontSize: 10))),
+        pw.Center(child: pw.Text(lesson.region.toUpperCase(), style: pw.TextStyle(fontSize: 10))),
+        pw.Center(child: pw.Text(lesson.department.toUpperCase(), style: pw.TextStyle(fontSize: 10))),
+        pw.Center(child: pw.Text(lesson.school.toUpperCase(), style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold))),
+        pw.SizedBox(height: 15),
+        pw.Center(
+          child: pw.Text(
+            '${lesson.lessonType == 'detailed' ? 'MASUSING' : 'SEMI-DETAILED'} BANGHAY ARALIN SA ${lesson.subject.toUpperCase()}-${lesson.gradeLevel.toUpperCase()}',
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, decoration: pw.TextDecoration.underline),
+          ),
         ),
+        pw.SizedBox(height: 15),
         pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Expanded(child: _headerField('Teacher', lesson.teacherName)),
-            pw.Expanded(child: _headerField('Learning Area', lesson.subject)),
-          ],
-        ),
-        pw.Row(
-          children: [
-            pw.Expanded(child: _headerField('Date/Time', lesson.date != null ? DateFormat('yyyy-MM-dd').format(lesson.date!) : 'N/A')),
-            pw.Expanded(child: _headerField('Quarter', lesson.quarter)),
+            pw.Text('Petsa: ${lesson.date != null ? DateFormat('MMMM dd, yyyy').format(lesson.date!) : '________'}'),
+            pw.Text('Oras: ________'),
           ],
         ),
       ],
-    );
-  }
-
-  static pw.Widget _headerField(String label, String value) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.all(2),
-      child: pw.RichText(
-        text: pw.TextSpan(
-          children: [
-            pw.TextSpan(text: '$label: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-            pw.TextSpan(text: value),
-          ],
-        ),
-      ),
     );
   }
 
   static pw.Widget _buildSectionTitle(String title) {
     return pw.Container(
-      width: double.infinity,
-      color: PdfColors.grey300,
-      padding: const pw.EdgeInsets.all(4),
-      margin: const pw.EdgeInsets.symmetric(vertical: 4),
-      child: pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Text(title, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 12)),
     );
   }
 
   static pw.Widget _buildObjectiveRow(String label, String value) {
+    if (value.isEmpty) return pw.SizedBox();
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 4),
-      child: pw.Column(
+      padding: const pw.EdgeInsets.only(left: 20, bottom: 2),
+      child: pw.Text('$label: $value', style: pw.TextStyle(fontSize: 11)),
+    );
+  }
+
+  static pw.Widget _buildInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(left: 20, bottom: 2),
+      child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-          pw.Text(value),
+          pw.SizedBox(width: 80, child: pw.Text('$label: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+          pw.Expanded(child: pw.Text(value, style: pw.TextStyle(fontSize: 11))),
         ],
       ),
     );
   }
 
-  static pw.Widget _buildResourceRow(String label, String value) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.SizedBox(width: 100, child: pw.Text(label, style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-        pw.Expanded(child: pw.Text(value)),
-      ],
-    );
-  }
-
   static pw.Widget _buildProcedureTable(LessonPlan lesson) {
+    bool isDetailed = lesson.lessonType == 'detailed';
+    
+    if (!isDetailed) {
+      return pw.Column(
+        children: lesson.procedures.map((p) => pw.Padding(
+          padding: const pw.EdgeInsets.only(left: 20, bottom: 8),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('${p.stepId}. ${p.stepTitle}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+              pw.Padding(padding: const pw.EdgeInsets.only(left: 10), child: pw.Text(p.teacherActivity, style: pw.TextStyle(fontSize: 11))),
+            ],
+          ),
+        )).toList(),
+      );
+    }
+
     return pw.Table(
       border: pw.TableBorder.all(),
       children: [
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.grey200),
           children: [
-            pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Steps', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-            pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Teacher Activity', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
-            pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Learner Activity', style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+            pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Gawain ng Guro', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10))),
+            pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text('Gawain ng Mag-aaral', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10))),
           ],
         ),
-        ...lesson.procedures.map((step) => pw.TableRow(
-              children: [
-                pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text(step.stepId)),
-                pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text(step.teacherActivity)),
-                pw.Padding(padding: const pw.EdgeInsets.all(4), child: pw.Text(step.learnerResponse)),
-              ],
-            )),
+        ...lesson.procedures.map((p) => pw.TableRow(
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(4),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(p.stepTitle, style: pw.TextStyle(fontSize: 8, fontStyle: pw.FontStyle.italic, color: PdfColors.grey700)),
+                  pw.Text(p.teacherActivity, style: pw.TextStyle(fontSize: 10)),
+                ],
+              ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(4),
+              child: pw.Text(p.learnerResponse, style: pw.TextStyle(fontSize: 10)),
+            ),
+          ],
+        )),
       ],
     );
   }

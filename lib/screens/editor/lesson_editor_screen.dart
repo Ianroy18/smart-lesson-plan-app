@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../models/lesson_plan.dart';
 import '../../providers/lesson_provider.dart';
 import '../../services/pdf_service.dart';
@@ -35,6 +37,25 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
     }
   }
 
+  void _pickImages() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: true,
+      withData: true,
+    );
+
+    if (result != null) {
+      setState(() {
+        for (var file in result.files) {
+          if (file.bytes != null) {
+            final base64String = base64Encode(file.bytes!);
+            _currentLesson.images.add('data:image/png;base64,$base64String');
+          }
+        }
+      });
+    }
+  }
+
   void _saveLesson() async {
     setState(() => _isSaving = true);
     final provider = context.read<LessonProvider>();
@@ -48,7 +69,7 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lesson plan saved successfully')),
       );
-      Navigator.pop(context); // Go back to Dashboard
+      Navigator.pop(context);
     }
   }
 
@@ -123,27 +144,33 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
             content: _buildObjectivesSection(),
           ),
           Step(
-            title: const Text('Content'),
+            title: const Text('Subject Matter'),
             label: const Icon(LucideIcons.bookOpen),
             isActive: _currentStep >= 2,
             content: _buildContentSection(),
           ),
           Step(
+            title: const Text('Visual Aids'),
+            label: const Icon(LucideIcons.image),
+            isActive: _currentStep >= 3,
+            content: _buildImageSection(),
+          ),
+          Step(
             title: const Text('Procedures'),
             label: const Icon(LucideIcons.listChecks),
-            isActive: _currentStep >= 3,
+            isActive: _currentStep >= 4,
             content: ProcedureSection(lesson: _currentLesson),
           ),
           Step(
             title: const Text('Assessment'),
             label: const Icon(LucideIcons.clipboardCheck),
-            isActive: _currentStep >= 4,
+            isActive: _currentStep >= 5,
             content: _buildAssessmentSection(),
           ),
           Step(
             title: const Text('Reflection'),
             label: const Icon(LucideIcons.messageSquare),
-            isActive: _currentStep >= 5,
+            isActive: _currentStep >= 6,
             content: _buildReflectionSection(),
           ),
         ],
@@ -154,6 +181,17 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
   Widget _buildHeaderSection() {
     return Column(
       children: [
+        SegmentedButton<String>(
+          segments: const [
+            ButtonSegment(value: 'detailed', label: Text('Detailed'), icon: Icon(LucideIcons.layers)),
+            ButtonSegment(value: 'semi-detailed', label: Text('Semi-Detailed'), icon: Icon(LucideIcons.layoutList)),
+          ],
+          selected: {_currentLesson.lessonType},
+          onSelectionChanged: (val) => setState(() => _currentLesson.lessonType = val.first),
+        ),
+        const SizedBox(height: 16),
+        _buildTextField('Region', (val) => _currentLesson.region = val, initial: _currentLesson.region),
+        _buildTextField('Department', (val) => _currentLesson.department = val, initial: _currentLesson.department),
         _buildTextField('School Name', (val) => _currentLesson.school = val, initial: _currentLesson.school),
         _buildTextField('Teacher Name', (val) => _currentLesson.teacherName = val, initial: _currentLesson.teacherName),
         Row(
@@ -211,10 +249,59 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
       children: [
         _buildTextField('Topic / Lesson Title', (val) => _currentLesson.topic = val, initial: _currentLesson.topic),
         const SizedBox(height: 16),
-        const Text('Learning Resources', style: TextStyle(fontWeight: FontWeight.bold)),
-        _buildTextField('Teacher\'s Guide', (val) => _currentLesson.teachersGuide = val, initial: _currentLesson.teachersGuide),
-        _buildTextField('Learner\'s Materials', (val) => _currentLesson.learnersMaterials = val, initial: _currentLesson.learnersMaterials),
-        _buildTextField('Other Materials', (val) => _currentLesson.otherMaterials = val, initial: _currentLesson.otherMaterials, maxLines: 2),
+        const Text('Paksang Aralin (Subject Matter)', style: TextStyle(fontWeight: FontWeight.bold)),
+        _buildTextField('Sanggunian (References)', (val) => _currentLesson.references = val, initial: _currentLesson.references, maxLines: 2),
+        _buildTextField('Kagamitan (Materials)', (val) => _currentLesson.materials = val, initial: _currentLesson.materials, maxLines: 2),
+        _buildTextField('Pagpapahalaga (Values)', (val) => _currentLesson.values = val, initial: _currentLesson.values, maxLines: 2),
+      ],
+    );
+  }
+
+  Widget _buildImageSection() {
+    return Column(
+      children: [
+        const Text('Upload Visual Aids / Images', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 16),
+        if (_currentLesson.images.isNotEmpty)
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _currentLesson.images.length,
+              itemBuilder: (context, index) {
+                return Stack(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      width: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                          image: NetworkImage(_currentLesson.images[index]),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 4,
+                      top: 4,
+                      child: IconButton(
+                        icon: const Icon(LucideIcons.trash2, color: Colors.red, size: 20),
+                        onPressed: () => setState(() => _currentLesson.images.removeAt(index)),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: _pickImages,
+          icon: const Icon(LucideIcons.upload),
+          label: const Text('Add Images'),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+        ),
       ],
     );
   }

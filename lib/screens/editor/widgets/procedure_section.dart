@@ -25,7 +25,7 @@ class _ProcedureSectionState extends State<ProcedureSection> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
-        if (!isMobile) _buildTableHeader(),
+        if (!isMobile && widget.lesson.lessonType == 'detailed') _buildTableHeader(),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -34,7 +34,9 @@ class _ProcedureSectionState extends State<ProcedureSection> {
             final step = widget.lesson.procedures[index];
             return isMobile
                 ? _buildMobileStepCard(step)
-                : _buildDesktopStepRow(step);
+                : (widget.lesson.lessonType == 'detailed' 
+                    ? _buildDesktopStepRow(step)
+                    : _buildSemiDetailedStepRow(step));
           },
         ),
       ],
@@ -103,7 +105,37 @@ class _ProcedureSectionState extends State<ProcedureSection> {
     );
   }
 
+  Widget _buildSemiDetailedStepRow(ProcedureStep step) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('${step.stepId}. ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(step.stepTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              initialValue: step.teacherActivity,
+              maxLines: null,
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Enter procedure details...'),
+              onChanged: (val) => step.teacherActivity = val,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMobileStepCard(ProcedureStep step) {
+    bool isDetailed = widget.lesson.lessonType == 'detailed';
     Color stepColor = _getStepColor(step.stepId);
     return Card(
       elevation: 2,
@@ -138,29 +170,31 @@ class _ProcedureSectionState extends State<ProcedureSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('TEACHER ACTIVITY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.blueGrey)),
+                Text(isDetailed ? 'TEACHER ACTIVITY' : 'PROCEDURE', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.blueGrey)),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: step.teacherActivity,
                   maxLines: null,
                   onChanged: (val) => step.teacherActivity = val,
                   decoration: InputDecoration(
-                    hintText: 'What will the teacher do?',
+                    hintText: isDetailed ? 'What will the teacher do?' : 'Enter procedure...',
                     fillColor: Colors.blue.withOpacity(0.02),
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text('LEARNER RESPONSE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.blueGrey)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  initialValue: step.learnerResponse,
-                  maxLines: null,
-                  onChanged: (val) => step.learnerResponse = val,
-                  decoration: InputDecoration(
-                    hintText: 'What will the learners do?',
-                    fillColor: Colors.green.withOpacity(0.02),
+                if (isDetailed) ...[
+                  const SizedBox(height: 16),
+                  const Text('LEARNER RESPONSE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.blueGrey)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    initialValue: step.learnerResponse,
+                    maxLines: null,
+                    onChanged: (val) => step.learnerResponse = val,
+                    decoration: InputDecoration(
+                      hintText: 'What will the learners do?',
+                      fillColor: Colors.green.withOpacity(0.02),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
