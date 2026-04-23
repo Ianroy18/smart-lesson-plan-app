@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onSelected: (value) async {
               if (value == 'logout') {
                 final prefs = await SharedPreferences.getInstance();
-                await prefs.clear(); // This will reset everything
+                await prefs.clear();
                 if (mounted) {
                   Navigator.pushReplacementNamed(context, '/');
                 }

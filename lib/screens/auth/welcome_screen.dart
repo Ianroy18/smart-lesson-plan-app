@@ -64,7 +64,7 @@ class WelcomeScreen extends StatelessWidget {
                       size: 60,
                       color: Color(0xFF003366),
                     ),
-                  ).animate().scale(duration: 600.ms, curve: Curves.backOut),
+                  ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
                   
                   const SizedBox(height: 40),
                   
