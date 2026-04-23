@@ -48,7 +48,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'An error occurred during registration');
+      String errorMessage = e.message ?? 'An error occurred during registration';
+      if (e.code == 'operation-not-allowed') {
+        errorMessage = 'Email/Password accounts are not enabled in Firebase Console. Please enable them in the Authentication tab.';
+      }
+      _showError(errorMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
