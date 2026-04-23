@@ -48,6 +48,7 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lesson plan saved successfully')),
       );
+      Navigator.pop(context); // Go back to Dashboard
     }
   }
 
