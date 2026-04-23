@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1018256705566",
+    "project_id": "smart-lesson-plan-app",
+    "storage_bucket": "smart-lesson-plan-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018256705566:android:38d1b385e0c52e1d5a860f",
+        "android_client_info": {
+          "package_name": "com.deped.smartlp.smart_lesson_plan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGzpoBTA0e51zuZvjALSUqP29FQoEl-VQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

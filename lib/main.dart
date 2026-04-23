@@ -8,15 +8,17 @@ import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/auth/welcome_screen.dart';
 import 'screens/auth/login_screen.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // NOTE: You need to run 'flutterfire configure' in your terminal
-  // to generate the firebase_options.dart file for your specific project.
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
-    print("Firebase initialization failed: $e");
+    debugPrint("Firebase initialization failed: $e");
   }
 
   final prefs = await SharedPreferences.getInstance();
