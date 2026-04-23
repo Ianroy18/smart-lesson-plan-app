@@ -173,8 +173,8 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: _currentLesson.date ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
                   if (picked != null) setState(() => _currentLesson.date = picked);
                 },
