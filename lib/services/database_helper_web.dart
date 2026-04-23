@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
 import '../../models/lesson_plan.dart';
-import 'database_helper_stub.dart';
+import 'lesson_repository.dart';
 
-class DatabaseHelperWeb implements DatabaseHelper {
+class DatabaseHelperWeb implements LessonRepository {
   static final DatabaseHelperWeb _instance = DatabaseHelperWeb._internal();
   factory DatabaseHelperWeb() => _instance;
   DatabaseHelperWeb._internal();
@@ -23,7 +23,7 @@ class DatabaseHelperWeb implements DatabaseHelper {
   }
 
   @override
-  Future<void> insertLessonPlan(LessonPlan plan) async {
+  Future<void> save(LessonPlan plan) async {
     final lessons = _getWebLessons();
     lessons.removeWhere((l) => l.id == plan.id);
     lessons.add(plan);
@@ -31,17 +31,12 @@ class DatabaseHelperWeb implements DatabaseHelper {
   }
 
   @override
-  Future<List<LessonPlan>> getLessonPlans(String userId) async {
+  Future<List<LessonPlan>> getAll(String userId) async {
     return _getWebLessons().where((l) => l.userId == userId).toList();
   }
 
   @override
-  Future<void> updateLessonPlan(LessonPlan plan) async {
-    await insertLessonPlan(plan);
-  }
-
-  @override
-  Future<void> deleteLessonPlan(String id) async {
+  Future<void> delete(String id) async {
     final lessons = _getWebLessons();
     lessons.removeWhere((l) => l.id == id);
     _saveWebLessons(lessons);

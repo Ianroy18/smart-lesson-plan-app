@@ -2,9 +2,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 import '../../models/lesson_plan.dart';
-import 'database_helper_stub.dart';
+import 'lesson_repository.dart';
 
-class DatabaseHelperMobile implements DatabaseHelper {
+class DatabaseHelperMobile implements LessonRepository {
   static final DatabaseHelperMobile _instance = DatabaseHelperMobile._internal();
   static Database? _database;
 
@@ -40,13 +40,13 @@ class DatabaseHelperMobile implements DatabaseHelper {
   }
 
   @override
-  Future<void> insertLessonPlan(LessonPlan plan) async {
+  Future<void> save(LessonPlan plan) async {
     Database db = await database;
     await db.insert('lesson_plans', plan.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
-  Future<List<LessonPlan>> getLessonPlans(String userId) async {
+  Future<List<LessonPlan>> getAll(String userId) async {
     Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(
       'lesson_plans',
@@ -58,17 +58,11 @@ class DatabaseHelperMobile implements DatabaseHelper {
   }
 
   @override
-  Future<void> updateLessonPlan(LessonPlan plan) async {
-    Database db = await database;
-    await db.update('lesson_plans', plan.toMap(), where: 'id = ?', whereArgs: [plan.id]);
-  }
-
-  @override
-  Future<void> deleteLessonPlan(String id) async {
+  Future<void> delete(String id) async {
     Database db = await database;
     await db.delete('lesson_plans', where: 'id = ?', whereArgs: [id]);
   }
 }
 
 // Global factory for conditional export
-DatabaseHelper getInstance() => DatabaseHelperMobile();
+LessonRepository getInstance() => DatabaseHelperMobile();

@@ -1,10 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
-import '../models/lesson_plan.dart';
-import '../services/database_helper.dart';
+import '../services/lesson_repository.dart';
 
 class LessonProvider with ChangeNotifier {
-  final DatabaseHelper _dbHelper = getInstance();
+  final LessonRepository _repo = LessonRepository();
   List<LessonPlan> _lessons = [];
   bool _isLoading = false;
 
@@ -15,7 +12,7 @@ class LessonProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _lessons = await _dbHelper.getLessonPlans(userId);
+      _lessons = await _repo.getAll(userId);
       if (_lessons.isEmpty) {
         _lessons = [
           LessonPlan(
@@ -46,14 +43,14 @@ class LessonProvider with ChangeNotifier {
 
   Future<void> addLesson(LessonPlan lesson) async {
     lesson.id ??= const Uuid().v4();
-    await _dbHelper.insertLessonPlan(lesson);
+    await _repo.save(lesson);
     _lessons.insert(0, lesson);
     notifyListeners();
   }
 
   Future<void> updateLesson(LessonPlan lesson) async {
     lesson.updatedAt = DateTime.now();
-    await _dbHelper.updateLessonPlan(lesson);
+    await _repo.save(lesson);
     int index = _lessons.indexWhere((l) => l.id == lesson.id);
     if (index != -1) {
       _lessons[index] = lesson;
@@ -62,7 +59,7 @@ class LessonProvider with ChangeNotifier {
   }
 
   Future<void> deleteLesson(String id) async {
-    await _dbHelper.deleteLessonPlan(id);
+    await _repo.delete(id);
     _lessons.removeWhere((l) => l.id == id);
     notifyListeners();
   }
