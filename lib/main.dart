@@ -28,7 +28,6 @@ void main() async {
     debugPrint("Firebase initialization failed: $e");
   }
 
-  final prefs = await SharedPreferences.getInstance();
   final bool showWelcome = prefs.getBool('show_welcome') ?? true;
   final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
 

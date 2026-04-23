@@ -44,4 +44,4 @@ class DatabaseHelperWeb implements LessonRepository {
 }
 
 // Global factory for conditional export
-DatabaseHelper getInstance() => DatabaseHelperWeb();
+LessonRepository getInstance() => DatabaseHelperWeb();
