@@ -74,7 +74,7 @@ class _LessonEditorScreenState extends State<LessonEditorScreen> {
         ],
       ),
       body: Stepper(
-        type: StepperType.horizontal,
+        type: MediaQuery.of(context).size.width < 700 ? StepperType.vertical : StepperType.horizontal,
         currentStep: _currentStep,
         onStepTapped: (step) => setState(() => _currentStep = step),
         onStepContinue: () {
