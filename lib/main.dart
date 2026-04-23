@@ -11,37 +11,44 @@ import 'screens/auth/login_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  final prefs = await SharedPreferences.getInstance();
-  
-  if (prefs.getBool('force_reset_v2') == null) {
-    await prefs.clear();
-    await prefs.setBool('force_reset_v2', true);
-  }
-
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    final prefs = await SharedPreferences.getInstance();
+    
+    // One-time reset logic
+    if (prefs.getBool('force_reset_v3') == null) {
+      await prefs.clear();
+      await prefs.setBool('force_reset_v3', true);
+    }
+
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (e) {
+      debugPrint("Firebase init error: $e");
+    }
+
+    final bool showWelcome = prefs.getBool('show_welcome') ?? true;
+    final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LessonProvider()),
+        ],
+        child: SmartLessonApp(
+          showWelcome: showWelcome,
+          isLoggedIn: isLoggedIn,
+        ),
+      ),
     );
   } catch (e) {
-    debugPrint("Firebase initialization failed: $e");
+    debugPrint("Critical Init Error: $e");
+    // Fallback to minimal app if everything fails
+    runApp(const MaterialApp(home: Scaffold(body: Center(child: Text("App Error. Please Refresh.")))));
   }
-
-  final bool showWelcome = prefs.getBool('show_welcome') ?? true;
-  final bool isLoggedIn = prefs.getBool('is_logged_in') ?? false;
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LessonProvider()),
-      ],
-      child: SmartLessonApp(
-        showWelcome: showWelcome,
-        isLoggedIn: isLoggedIn,
-      ),
-    ),
-  );
 }
 
 class SmartLessonApp extends StatelessWidget {
