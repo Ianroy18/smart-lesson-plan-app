@@ -9,6 +9,7 @@ import '../../providers/lesson_provider.dart';
 import '../../models/lesson_plan.dart';
 import '../../services/pdf_service.dart';
 import '../editor/lesson_editor_screen.dart';
+import '../profile/profile_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -56,7 +57,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           PopupMenuButton<String>(
             icon: const Icon(LucideIcons.user),
             onSelected: (value) async {
-              if (value == 'logout') {
+              if (value == 'profile') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+              } else if (value == 'logout') {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
                 if (mounted) {
